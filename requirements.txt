@@ -1,0 +1,6 @@
+# Core runtime dependencies / 核心运行依赖
+numpy>=1.26
+opencv-python>=4.10
+Pillow>=10.4
+tifffile>=2024.8.30
+

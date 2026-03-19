@@ -1,0 +1,35 @@
+# Python cache / Python 缓存
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments / 虚拟环境
+venv/
+.venv/
+env/
+
+# Local settings / 本地设置
+config/user_settings.json
+
+# Local exports and generated output / 本地导出与生成结果
+*_split/
+export_current_*/
+export_all_*/
+_smoke_outputs/
+
+# Local samples and temporary work files / 本地样本与临时文件
+001.fff
+_async_smoke/
+_switch_state_smoke/
+_switch_guard_smoke/
+_progress_smoke/
+_progress_smoke2/
+_progress_smoke3/
+_recovery_tools/
+
+# Editors and operating systems / 编辑器与操作系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+

@@ -2,7 +2,7 @@
 
 English | [简体中文](README.zh-CN.md)
 
-[License](LICENSE) | [许可证说明](LICENSE.zh-CN.md)
+[License](LICENSE)
 
 Grain Splitter is a desktop tool for detecting and splitting large film scan sheets, including Hasselblad `FFF` workflows. It is built with Python and Tkinter, and is designed for high-resolution scans that need both automatic detection and manual correction.
 
@@ -18,7 +18,7 @@ Grain Splitter is a desktop tool for detecting and splitting large film scan she
 
 ## Supported Workflows
 
-### Input formats
+### Input Formats
 
 - `FFF`
 - `TIFF` / `TIF`
@@ -27,7 +27,7 @@ Grain Splitter is a desktop tool for detecting and splitting large film scan she
 - `BMP`
 - `WEBP`
 
-### Output formats
+### Output Formats
 
 - Original format when possible
 - `JPG`
@@ -39,7 +39,7 @@ Grain Splitter is a desktop tool for detecting and splitting large film scan she
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-name>/grain-splitter.git
+git clone https://github.com/Zwiengli/grain-splitter.git
 cd grain-splitter
 ```
 
@@ -103,25 +103,11 @@ python neg_splitter.py
 
 ```text
 .
-├─ app/          # GUI, preview canvas, settings, theme glue
-├─ core/         # Image loading, detection, export, shared constants
+├─ app/          # GUI, preview canvas, settings, and UI logic
+├─ core/         # Image loading, detection, export, and shared constants
 ├─ i18n/         # UI language files
 ├─ config/       # Default settings and local user settings
 ├─ main.py       # Main entry point
 └─ neg_splitter.py
 ```
 
-## GitHub-Friendly Project Files
-
-- [`requirements.txt`](requirements.txt): core runtime dependencies.
-- [`requirements-optional.txt`](requirements-optional.txt): optional extra dependency for wider `FFF` support.
-- [`.gitignore`](.gitignore): ignores virtual environments, caches, local settings, exports, and large local sample files.
-- [`README.zh-CN.md`](README.zh-CN.md): Chinese documentation entry for GitHub readers.
-- [`LICENSE`](LICENSE): English license text.
-- [`LICENSE.zh-CN.md`](LICENSE.zh-CN.md): Chinese license note and reading guide.
-
-## Notes
-
-- The project stores user-specific settings in `config/user_settings.json`. This file is ignored by Git.
-- Large local sample scans such as `001.fff` are ignored by default so the repository stays lightweight.
-- If you plan to publish the repository publicly, consider adding a `LICENSE` file that matches how you want others to use the project.

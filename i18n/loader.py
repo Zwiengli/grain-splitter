@@ -1,8 +1,8 @@
 ﻿from __future__ import annotations
 
 import json
-from pathlib import Path
 
+from core.runtime_paths import get_resource_path
 
 LANGUAGE_FILES = {
     "zh": "zh_cn.json",
@@ -10,11 +10,8 @@ LANGUAGE_FILES = {
     "de": "de.json",
 }
 
-_BASE_DIR = Path(__file__).resolve().parent
-
-
 def _load_json(name: str) -> dict:
-    path = _BASE_DIR / name
+    path = get_resource_path("i18n", name)
     with path.open("r", encoding="utf-8-sig") as fh:
         data = json.load(fh)
     if not isinstance(data, dict):

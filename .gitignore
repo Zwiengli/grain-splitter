@@ -16,9 +16,15 @@ config/user_settings.json
 export_current_*/
 export_all_*/
 _smoke_outputs/
+build/
+assets/
+dist/
+*.spec
 
 # Local samples and temporary work files / 本地样本与临时文件
 001.fff
+build_exe.ps1
+windows_version_info.txt
 _async_smoke/
 _switch_state_smoke/
 _switch_guard_smoke/
@@ -32,4 +38,3 @@ _recovery_tools/
 .vscode/
 .DS_Store
 Thumbs.db
-

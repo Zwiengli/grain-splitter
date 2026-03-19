@@ -38,6 +38,7 @@ from core.constants import (
     TIFF_COMPRESSION_IDS,
 )
 from core.image_loader import downscale_image, load_image, load_preview_image, rotate_image, to_gray8
+from core.runtime_paths import get_resource_path, get_user_config_path
 from core.splitter_engine import (
     build_box_only_layout,
     build_layout_from_snapshot,
@@ -55,12 +56,12 @@ from i18n.loader import I18N
 class SplitterApp:
     def __init__(self, root):
         self.root = root
+        self.apply_window_icon()
         self.root.geometry("1450x920")
 
-        config_dir = Path(__file__).resolve().parent.parent / "config"
         self.settings_manager = SettingsManager(
-            config_dir / "default_settings.json",
-            config_dir / "user_settings.json",
+            get_resource_path("config", "default_settings.json"),
+            get_user_config_path("user_settings.json"),
         )
         self.theme_manager = ThemeManager(self.root)
 
@@ -142,6 +143,15 @@ class SplitterApp:
         self.apply_theme()
         self.apply_language()
         self.set_status("status_ready")
+
+    def apply_window_icon(self):
+        icon_path = get_resource_path("assets", "icons", "grain_splitter.ico")
+        if not icon_path.exists():
+            return
+        try:
+            self.root.iconbitmap(default=str(icon_path))
+        except Exception:
+            pass
 
     def tr(self, key: str, **kwargs):
         text = I18N.get(self.current_lang, {}).get(key)

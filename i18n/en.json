@@ -88,6 +88,7 @@
   "msg_still_loading": "The image is still loading. Please wait a moment.",
   "msg_need_detection": "Please run detection first.",
   "msg_no_images": "No supported images were found in the folder.",
+  "msg_no_startup_images": "No supported image files were found in the provided selection.",
   "msg_no_file_list": "There are no loaded images.",
   "msg_no_guides": "There are no auto guides to restore.",
   "msg_export_done": "Exported {total} images to:\n{path}",

@@ -88,6 +88,7 @@
   "msg_still_loading": "Das Bild wird noch geladen. Bitte kurz warten.",
   "msg_need_detection": "Bitte zuerst die Erkennung ausführen.",
   "msg_no_images": "Im Ordner wurden keine unterstützten Bilder gefunden.",
+  "msg_no_startup_images": "In der übergebenen Auswahl wurden keine unterstützten Bilddateien gefunden.",
   "msg_no_file_list": "Es sind keine Bilder geladen.",
   "msg_no_guides": "Es gibt keine automatischen Linien zum Wiederherstellen.",
   "msg_export_done": "{total} Bilder exportiert nach:\n{path}",

@@ -1,3 +1,1 @@
-# Optional dependency for broader FFF and RAW compatibility / 用于增强 FFF 与 RAW 兼容性的可选依赖
-rawpy>=0.24
-
+# No optional runtime image-reading dependencies at the moment / 当前暂无额外运行时图像读取依赖

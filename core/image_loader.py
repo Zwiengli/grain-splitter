@@ -11,14 +11,14 @@ from core.constants import MAX_PREVIEW_BASE_DIM
 Image.MAX_IMAGE_PIXELS = None
 
 try:
-    import rawpy
-except Exception:
-    rawpy = None
-
-try:
     import tifffile
 except Exception:
     tifffile = None
+
+
+TIFF_LIKE_EXTS = {".tif", ".tiff", ".fff"}
+
+
 def normalize_to_uint8(arr: np.ndarray) -> np.ndarray:
     arr = np.asarray(arr)
     if arr.dtype == np.uint8:
@@ -84,110 +84,42 @@ def read_with_cv2(path: str) -> np.ndarray:
     return img
 
 
-def read_with_pillow(path: str) -> np.ndarray:
-    with Image.open(path) as im:
-        if getattr(im, "n_frames", 1) > 1:
-            im.seek(0)
-        if im.mode not in {"RGB", "RGBA", "L", "I;16", "I;16B", "I;16L", "I"}:
-            im = im.convert("RGB")
-        arr = np.array(im)
-
-    if arr.ndim == 2:
-        return cv2.cvtColor(normalize_to_uint8(arr), cv2.COLOR_GRAY2BGR)
-
-    if arr.ndim != 3:
-        raise RuntimeError(f"Pillow 杩斿洖浜嗕笉鏀寔鐨勭淮搴? {arr.ndim}")
-
-    if arr.shape[2] == 4:
-        arr = arr[:, :, :3]
-    return cv2.cvtColor(normalize_to_uint8(arr), cv2.COLOR_RGB2BGR)
-
-
-def load_preview_image(path: str, max_dim: int = MAX_PREVIEW_BASE_DIM):
-    try:
-        with Image.open(path) as im:
-            if getattr(im, "n_frames", 1) > 1:
-                im.seek(0)
-            orig_w, orig_h = im.size
-            try:
-                im.draft("RGB", (max_dim, max_dim))
-            except Exception:
-                pass
-            if im.mode not in {"RGB", "RGBA", "L", "I;16", "I;16B", "I;16L", "I"}:
-                im = im.convert("RGB")
-            im.thumbnail((max_dim, max_dim), Image.Resampling.BILINEAR)
-            arr = np.array(im)
-
-        if arr.ndim == 2:
-            preview_bgr = cv2.cvtColor(normalize_to_uint8(arr), cv2.COLOR_GRAY2BGR)
-        elif arr.ndim == 3:
-            if arr.shape[2] == 4:
-                arr = arr[:, :, :3]
-            preview_bgr = cv2.cvtColor(normalize_to_uint8(arr), cv2.COLOR_RGB2BGR)
-        else:
-            return None
-
-        ratio = min(1.0, float(max_dim) / float(max(orig_h, orig_w))) if max(orig_h, orig_w) > 0 else 1.0
-        return preview_bgr, float(ratio), {"backend": "Pillow-preview", "suffix": Path(path).suffix.lower()}
-    except Exception:
-        return None
-
-
 def read_with_tifffile(path: str) -> np.ndarray:
     if tifffile is None:
-        raise RuntimeError("鏈畨瑁?tifffile")
+        raise RuntimeError("tifffile is not installed")
     arr = tifffile.imread(path)
     return array_to_bgr(arr, assume_rgb=True)
 
 
-def read_with_rawpy(path: str) -> np.ndarray:
-    if rawpy is None:
-        raise RuntimeError("鏈畨瑁?rawpy")
-    with rawpy.imread(path) as raw:
-        rgb = raw.postprocess(
-            use_camera_wb=True,
-            no_auto_bright=True,
-            auto_bright_thr=0.0,
-            output_bps=8,
-        )
-    return cv2.cvtColor(rgb, cv2.COLOR_RGB2BGR)
+def choose_reader(path: str):
+    suffix = Path(path).suffix.lower()
+    if suffix in TIFF_LIKE_EXTS and tifffile is not None:
+        return "tifffile", read_with_tifffile
+    return "OpenCV", read_with_cv2
+
+
+def load_preview_image(path: str, max_dim: int = MAX_PREVIEW_BASE_DIM):
+    backend_name, reader = choose_reader(path)
+    try:
+        img = reader(path)
+        preview_bgr, ratio = downscale_image(img, max_dim)
+        return preview_bgr, float(ratio), {"backend": f"{backend_name}-preview", "suffix": Path(path).suffix.lower()}
+    except Exception:
+        return None
 
 
 def load_image(path: str):
     suffix = Path(path).suffix.lower()
-    if suffix == ".fff":
-        backends = [
-            ("tifffile", read_with_tifffile),
-            ("Pillow", read_with_pillow),
-            ("OpenCV", read_with_cv2),
-            ("rawpy", read_with_rawpy),
-        ]
-    else:
-        backends = [
-            ("OpenCV", read_with_cv2),
-            ("Pillow", read_with_pillow),
-            ("tifffile", read_with_tifffile),
-        ]
+    backend_name, reader = choose_reader(path)
+    try:
+        result = reader(path)
+    except Exception as exc:
+        raise RuntimeError(f"Unable to read image with {backend_name}: {exc}") from exc
 
-    attempts = []
-    used_backend = None
-    result = None
-    for name, reader in backends:
-        try:
-            img = reader(path)
-            if img is None or img.size == 0:
-                raise RuntimeError("璇诲彇缁撴灉涓虹┖")
-            result = img
-            used_backend = name
-            break
-        except Exception as exc:
-            attempts.append(f"{name}: {exc}")
+    if result is None or result.size == 0:
+        raise RuntimeError(f"Unable to read image with {backend_name}: empty result")
 
-    if result is None:
-        details = "\n".join(attempts) if attempts else "no available image readers"
-        raise RuntimeError(f"Unable to read image:\n{details}")
-
-    return result, {"backend": used_backend, "attempts": attempts, "suffix": suffix}
+    return result, {"backend": backend_name, "attempts": [], "suffix": suffix}
 
 
 def rotate_image(img_bgr: np.ndarray, deg: int) -> np.ndarray:

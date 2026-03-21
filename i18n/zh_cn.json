@@ -88,6 +88,7 @@
   "msg_still_loading": "图像仍在加载中，请稍候。",
   "msg_need_detection": "请先执行一次自动检测。",
   "msg_no_images": "文件夹中没有可处理的图像。",
+  "msg_no_startup_images": "传入的选中项里没有可处理的图像文件。",
   "msg_no_file_list": "当前没有已加载的图片。",
   "msg_no_guides": "当前没有可恢复的自动框线。",
   "msg_export_done": "已导出 {total} 张到:\n{path}",

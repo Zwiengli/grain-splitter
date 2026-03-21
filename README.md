@@ -34,64 +34,11 @@ Grain Splitter is a desktop tool for detecting and splitting large film scan she
 - `PNG`
 - `TIFF`
 
-## Installation
+## Documentation
 
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/Zwiengli/grain-splitter.git
-cd grain-splitter
-```
-
-### 2. Create and activate a virtual environment
-
-#### Windows PowerShell
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-```
-
-#### Windows Command Prompt
-
-```bat
-python -m venv .venv
-.\.venv\Scripts\activate.bat
-```
-
-#### macOS / Linux
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install dependencies
-
-```bash
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-### 4. Optional dependency for additional `FFF` / RAW compatibility
-
-```bash
-python -m pip install -r requirements-optional.txt
-```
-
-`rawpy` is optional. The app already tries `tifffile`, `Pillow`, and `OpenCV`, but `rawpy` can help with some RAW-like `FFF` files.
-
-### 5. Run the app
-
-```bash
-python main.py
-```
-
-The compatibility entry point below also works:
-
-```bash
-python neg_splitter.py
-```
+- [Documentation Index](docs/README.md)
+- [Installation Guide](docs/INSTALLATION.md)
+- [ART User Commands Guide](docs/ART_USERCOMMANDS.md)
 
 ## Requirements
 
@@ -103,11 +50,11 @@ python neg_splitter.py
 
 ```text
 .
-├─ app/          # GUI, preview canvas, settings, and UI logic
-├─ core/         # Image loading, detection, export, and shared constants
-├─ i18n/         # UI language files
-├─ config/       # Default settings and local user settings
-├─ main.py       # Main entry point
-└─ neg_splitter.py
+├── app/          # GUI, preview canvas, settings, and UI logic
+├── core/         # Image loading, detection, export, and shared constants
+├── docs/         # User-facing documentation
+├── i18n/         # UI language files
+├── config/       # Default settings and local user settings
+├── main.py       # Main entry point
+└── neg_splitter.py
 ```
-

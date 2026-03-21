@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import argparse
 import queue
+import sys
 import threading
 import traceback
 from collections import OrderedDict
@@ -54,10 +56,12 @@ from i18n.loader import I18N
 
 
 class SplitterApp:
-    def __init__(self, root):
+    def __init__(self, root, startup_paths=None, startup_inputs_provided: bool = False):
         self.root = root
         self.apply_window_icon()
         self.root.geometry("1450x920")
+        self.startup_paths = list(startup_paths or [])
+        self.startup_inputs_provided = bool(startup_inputs_provided)
 
         self.settings_manager = SettingsManager(
             get_resource_path("config", "default_settings.json"),
@@ -143,6 +147,10 @@ class SplitterApp:
         self.apply_theme()
         self.apply_language()
         self.set_status("status_ready")
+        if self.startup_paths:
+            self.root.after(0, lambda paths=list(self.startup_paths): self.load_file_list(paths))
+        elif self.startup_inputs_provided:
+            self.root.after(0, self.show_no_supported_startup_inputs_message)
 
     def apply_window_icon(self):
         icon_path = get_resource_path("assets", "icons", "grain_splitter.ico")
@@ -158,6 +166,9 @@ class SplitterApp:
         if text is None:
             text = I18N["zh"].get(key, key)
         return text.format(**kwargs) if kwargs else text
+
+    def show_no_supported_startup_inputs_message(self):
+        messagebox.showinfo(self.tr("dialog_info"), self.tr("msg_no_startup_images"))
 
     def rotation_text(self, deg: int) -> str:
         mapping = {
@@ -1886,9 +1897,86 @@ class SplitterApp:
         return "break"
 
 
+def normalize_startup_path_value(value: str | Path) -> str:
+    text = str(value).strip()
+    if len(text) >= 2 and text[0] == '"' and text[-1] == '"':
+        text = text[1:-1]
+    return text
+
+
+def collect_folder_paths(folder: str | Path) -> list[str]:
+    path = Path(normalize_startup_path_value(folder)).expanduser()
+    try:
+        resolved = path.resolve()
+    except OSError:
+        resolved = path
+
+    if not resolved.is_dir():
+        return []
+
+    try:
+        candidates = sorted(
+            (
+                item for item in resolved.iterdir()
+                if item.is_file() and item.suffix.lower() in SUPPORTED_EXTS
+            ),
+            key=lambda item: item.name.lower(),
+        )
+    except OSError:
+        return []
+    return [str(item) for item in candidates]
+
+
+def collect_startup_paths(inputs) -> list[str]:
+    normalized: list[str] = []
+    seen: set[str] = set()
+    for raw_input in inputs:
+        if not raw_input:
+            continue
+        path = Path(normalize_startup_path_value(raw_input)).expanduser()
+        try:
+            resolved = path.resolve()
+        except OSError:
+            resolved = path
+
+        if resolved.is_dir():
+            candidates = [Path(path_str) for path_str in collect_folder_paths(resolved)]
+        elif resolved.is_file() and resolved.suffix.lower() in SUPPORTED_EXTS:
+            candidates = [resolved]
+        else:
+            continue
+
+        for candidate in candidates:
+            key = str(candidate).casefold()
+            if key in seen:
+                continue
+            seen.add(key)
+            normalized.append(str(candidate))
+    return normalized
+
+
+def parse_startup_arguments(argv):
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-d", "--folder", dest="folder", default=None)
+    parser.add_argument("--folder-raw", dest="folder_raw", default=None)
+    parser.add_argument("-f", "--files", dest="files", nargs="*")
+    parser.add_argument("inputs", nargs="*")
+    args, _unknown = parser.parse_known_args(argv)
+
+    startup_inputs_provided = bool(argv)
+    if args.folder_raw:
+        return collect_folder_paths(args.folder_raw), startup_inputs_provided
+    if args.folder:
+        return collect_folder_paths(args.folder), startup_inputs_provided
+    if args.files:
+        return collect_startup_paths(args.files), startup_inputs_provided
+    return collect_startup_paths(args.inputs), startup_inputs_provided
+
+
 def main():
+    startup_inputs, startup_inputs_provided = parse_startup_arguments(sys.argv[1:])
     root = tk.Tk()
-    app = SplitterApp(root)
+    app = SplitterApp(root, startup_paths=startup_inputs, startup_inputs_provided=startup_inputs_provided)
     root.mainloop()
 
 
